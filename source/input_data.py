@@ -19,8 +19,9 @@ class InputData:
         self.input_folder = input_folder
         self.output_folder = output_folder
         self.load_from_file = load_from_file
-        self.df_global_param = param_file_dict['global_param.csv']
-        self.df_demand = param_file_dict['demand.csv']
+        if not load_from_file:
+            self.df_global_param = param_file_dict['global_param.csv']
+            self.df_demand = param_file_dict['demand.csv']
 
         self.original_size = None
         self.max_cut = None
