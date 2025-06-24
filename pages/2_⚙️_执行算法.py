@@ -163,8 +163,14 @@ shutil.copytree(os.path.join(project_dir, "source"), os.path.join(upload_dir, "s
 
 # 3. 再复制上传的文件
 if global_params_file:
-    with open(os.path.join(upload_dir, "global_params.csv"), "wb") as f:
-        f.write(global_params_file.read())
+    if global_params_file:
+        try:
+            save_path = os.path.join(upload_dir, "global_params.csv")
+            with open(save_path, "wb") as f:
+                f.write(global_params_file.read())
+            st.success(f"✅ 上传成功：{save_path}")
+        except Exception as e:
+            st.error(f"❌ 文件保存失败：{e}")
 
 if demand_file:
     with open(os.path.join(upload_dir, "demand.csv"), "wb") as f:
