@@ -118,7 +118,7 @@ st.header("📥 上传文件")
 col1, col2 = st.columns(2)
 
 with col1:
-    global_params_file = st.file_uploader("📄 上传全局参数文件（global_params.csv）", type="csv", key="global")
+    global_params_file = st.file_uploader("📄 上传全局参数文件（global_params.csv）", type="csv", key="global_params")
 with col2:
     demand_file = st.file_uploader("📄 上传需求文件（demand.csv）", type="csv", key="demand")
 
@@ -160,7 +160,7 @@ if st.button("🚀 运行算法", disabled=run_disabled,
             context = Context(
                 load_from_file=False,
                 param_file_dict={
-                    "global_param.csv": global_df,
+                    "global_params.csv": global_df,
                     "demand.csv": demand_df
                 }
             )
