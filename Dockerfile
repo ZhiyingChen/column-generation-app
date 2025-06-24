@@ -17,7 +17,8 @@ COPY . .
 
 RUN pip3 install -r requirements.txt
 
-EXPOSE 7860  # Hugging Face 默认监听 7860
+# Hugging Face 默认监听 7860
+EXPOSE 7860
 
 HEALTHCHECK CMD curl --fail http://localhost:7860/_stcore/health
 
