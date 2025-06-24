@@ -3,7 +3,7 @@ title: Column Generation App
 emoji: 🧩
 colorFrom: indigo
 colorTo: blue
-sdk: streamlit
+sdk: docker
 sdk_version: "1.33.0"
 app_file: app.py
 pinned: false
