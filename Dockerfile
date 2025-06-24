@@ -1,6 +1,6 @@
 FROM python:3.9-slim
 
-WORKDIR /.
+WORKDIR /app
 
 # 安装系统依赖
 RUN apt-get update && apt-get install -y \
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 
 
 # 然后复制所有代码（包括 app.py）
-COPY . .
+COPY . /app
 
 RUN pip3 install -r requirements.txt
 
