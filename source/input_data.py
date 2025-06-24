@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import logging
 from typing import Dict
@@ -12,9 +13,15 @@ class InputData:
             self
             , input_folder: str = "./"
             , output_folder: str = "output/"
+            , load_from_file: bool = True
+            , param_file_dict: dict = None
     ):
         self.input_folder = input_folder
         self.output_folder = output_folder
+        self.load_from_file = load_from_file
+        self.df_global_param = param_file_dict['global_param.csv']
+        self.df_demand = param_file_dict['demand.csv']
+
         self.original_size = None
         self.max_cut = None
         self.min_pattern_used_num = None
@@ -35,7 +42,15 @@ class InputData:
         ph = header.ParamHeader
         pn = field.ParamName
 
-        df_global_param = pd.read_csv('{}{}'.format(self.input_folder, filename.PARAMETER_FILE))
+        if self.load_from_file:
+            self.df_global_param = pd.read_csv(
+                os.path.join(
+                    self.input_folder,
+                    filename.PARAMETER_FILE
+                )
+            )
+
+        df_global_param = self.df_global_param
         global_param_dict = dict(zip(df_global_param[ph.parameter_name], df_global_param[ph.parameter_value]))
         self.original_size = float(global_param_dict[pn.original_size])
         self.max_cut = int(global_param_dict[pn.max_cut])
@@ -57,8 +72,15 @@ class InputData:
 
     def load_demand_dict(self):
         dh = header.DemandHeader
-        
-        demand_df = pd.read_csv('demand.csv')
+
+        if self.load_from_file:
+            self.df_demand = pd.read_csv(
+                os.path.join(
+                    self.input_folder,
+                    filename.DEMAND_FILE
+                )
+            )
+        demand_df = self.df_demand
         demand_df = demand_df[(demand_df[dh.size] > 0) & (demand_df[dh.amount] > 0)]
         # rename columns
         demand_df.rename(columns={dh.size: dh.size, dh.amount: dh.amount, dh.date: dh.date}, inplace=True)

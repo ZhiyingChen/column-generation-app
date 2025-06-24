@@ -5,6 +5,7 @@ import subprocess
 import matplotlib.pyplot as plt
 import matplotlib
 import pylab
+from source.context import Context
 
 # 设置使用的字体（需要显示中文的时候使用）
 font = {'family': 'SimHei'}
@@ -85,15 +86,6 @@ with st.expander("📦 输出文件说明：supplyOut.csv / demandOut.csv / fulf
 这些用于分析方案对需求的满足匹配情况，可用于生成追踪表、KPI 和图示。
 """)
 
-
-st.header("📥 上传文件")
-col1, col2 = st.columns(2)
-
-with col1:
-    global_params_file = st.file_uploader("📄 上传全局参数文件（global_params.csv）", type="csv", key="global")
-with col2:
-    demand_file = st.file_uploader("📄 上传需求文件（demand.csv）", type="csv", key="demand")
-
 # 示例数据展示
 with st.expander("📄 示例数据：global_params.csv"):
     try:
@@ -121,18 +113,34 @@ with st.expander("📄 示例数据：demand.csv"):
     except FileNotFoundError:
         st.warning("未找到 data/demand.csv 示例文件")
 
-# 工作目录
-working_dir = "./"
-if not os.path.exists(working_dir):
-    os.mkdir(working_dir)
+st.header("📥 上传文件")
+col1, col2 = st.columns(2)
 
-# 保存上传的文件到工作目录
-if global_params_file:
-    with open(os.path.join(working_dir, "global_params.csv"), "wb") as f:
-        f.write(global_params_file.read())
-if demand_file:
-    with open(os.path.join(working_dir, "demand.csv"), "wb") as f:
-        f.write(demand_file.read())
+with col1:
+    global_params_file = st.file_uploader("📄 上传全局参数文件（global_params.csv）", type="csv", key="global")
+with col2:
+    demand_file = st.file_uploader("📄 上传需求文件（demand.csv）", type="csv", key="demand")
+
+global_df = None
+demand_df = None
+
+if global_params_file is not None:
+    try:
+        global_df = pd.read_csv(global_params_file)
+        st.success("✅ 全局参数文件读取成功")
+        with st.expander("📄 全局参数文件: global_params.csv"):
+            st.dataframe(global_df)
+    except Exception as e:
+        st.error(f"❌ 读取全局参数失败：{e}")
+
+if demand_file is not None:
+    try:
+        demand_df = pd.read_csv(demand_file)
+        st.success("✅ 需求文件读取成功")
+        with st.expander("📄 需求文件：demand.csv"):
+            st.dataframe(demand_df)
+    except Exception as e:
+        st.error(f"❌ 读取需求文件失败：{e}")
 
 # 判断是否禁用运行按钮
 run_disabled = not (global_params_file and demand_file)
@@ -142,73 +150,69 @@ if st.button("🚀 运行算法", disabled=run_disabled,
              help="请先上传所需的两个输入文件" if run_disabled else "点击运行算法"):
     with st.spinner("算法运行中，请稍候..."):
         try:
-            # 运行 main.py
-            result = subprocess.run(
-                ["python", "./main.py"],
-                cwd=working_dir,
-                capture_output=True,
-                text=True
+            context = Context(
+                load_from_file=False,
+                param_file_dict={
+                    "global_param.csv": global_df,
+                    "demand.csv": demand_df
+                }
             )
-            if result.returncode == 0:
-                st.success("✅ 算法运行完成！")
-            else:
-                st.error("❌ 算法运行失败")
-                st.text(result.stderr)
+            output_files = context.run(
+            )
+            st.success("✅ 算法运行完成！")
+
         except Exception as e:
-            st.error(f"运行出错：{e}")
+            st.error(f"❌ 算法运行出错：{e}")
 
     st.markdown("---")
     st.header("📊 输出结果")
 
-    # 展示输出文件
-    output_dir = os.path.join(working_dir, "output")
-    output_files = {
-        "切割方案 (solutionOut.csv)": "solutionOut.csv",
-        "KPI指标 (kpiOut.csv)": "kpiOut.csv",
-        "供给结果 (supplyOut.csv)": "supplyOut.csv",
-        "需求满足情况 (demandOut.csv)": "demandOut.csv",
-        "供需匹配 (fulfillmentOut.csv)": "fulfillmentOut.csv"
+    output_files_label = {
+        "solutionOut.csv": "切割方案 (solutionOut.csv)",
+        "kpiOut.csv": "KPI指标 (kpiOut.csv)",
+        "supplyOut.csv": "供给结果 (supplyOut.csv)",
+        "demandOut.csv": "需求满足情况 (demandOut.csv)",
+        "fulfillmentOut.csv": "供需匹配 (fulfillmentOut.csv)"
     }
 
-    sol_df = pd.DataFrame()
-    for label, filename in output_files.items():
-        path = os.path.join(output_dir, filename)
-        if os.path.exists(path):
-            with st.expander(f"📄 {label}"):
-                df = pd.read_csv(path)
-                st.dataframe(df)
-                with open(path, "rb") as f:
-                    st.download_button(
-                        label=f"📥 下载 {filename}",
-                        data=f,
-                        file_name=filename,
-                        mime="text/csv"
-                    )
+    # 展示输出文件
+    for filename, df in output_files.items():
+        with st.expander("📄 {}".format(output_files_label[filename])):
+            st.dataframe(df)
 
-            if filename != "solutionOut.csv":
-                continue
+            st.download_button(
+                label=f"📥 下载 {filename}",
+                data=df.to_csv(index=False),
+                file_name=filename,
+                mime="text/csv"
+            )
 
-            sol_df = df.copy()
+        if filename != "solutionOut.csv":
+            continue
 
-            if sol_df.empty:
-                st.warning("切割方案为空，请检查输出文件。")
-            else:
-                # 可视化前五套方案的切割段宽
-                st.subheader("📏 切割方案图示")
-                for i in range(min(5, len(sol_df))):
-                    sample_row = sol_df.iloc[i]
-                    segments = [v for k, v in sample_row.items() if "切割方案" in k and pd.notna(v)]
-                    labels = [f"段{i} ({width})" for i, width in enumerate(segments)]
+        sol_df = df.copy()
 
-                    fig, ax = plt.subplots(figsize=(10, 1))
-                    left = 0
-                    colors = plt.cm.Paired(range(len(segments)))
-                    for j, width in enumerate(segments):
-                        ax.barh(0, width, left=left, height=0.3, color=colors[j], label=labels[j])
-                        ax.text(left + width / 2, 0, str(int(width)), ha='center', va='center', color='black',
-                                fontsize=8)
-                        left += width
-                    ax.set_xlim(0, left)
-                    ax.axis('off')
-                    ax.set_title(f"方案 {i} - 母卷切割段宽示意图")
-                    st.pyplot(fig)
+        if sol_df.empty:
+            st.warning("切割方案为空，请检查输出文件。")
+        else:
+            # 可视化前五套方案的切割段宽
+            st.subheader("📏 切割方案图示")
+            for i in range(min(5, len(sol_df))):
+                sample_row = sol_df.iloc[i]
+                segments = [v for k, v in sample_row.items()
+                            if "切割方案" in k and pd.notna(v)
+                        ]
+                labels = [f"段{i} ({width})" for i, width in enumerate(segments)]
+
+                fig, ax = plt.subplots(figsize=(10, 1))
+                left = 0
+                colors = plt.cm.Paired(range(len(segments)))
+                for j, width in enumerate(segments):
+                    ax.barh(0, width, left=left, height=0.3, color=colors[j], label=labels[j])
+                    ax.text(left + width / 2, 0, str(int(width)), ha='center', va='center', color='black',
+                            fontsize=8)
+                    left += width
+                ax.set_xlim(0, left)
+                ax.axis('off')
+                ax.set_title(f"方案 {i} - 母卷切割段宽示意图")
+                st.pyplot(fig)

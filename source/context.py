@@ -12,20 +12,23 @@ from . import do
 
 class Context:
     def __init__(
-            self
+            self,
+            load_from_file: bool = True,
+            param_file_dict: dict = None
     ):
 
         self.results = None
-        self.input_data: InputData = InputData()
-        self.result_storage: ResultStorage = ResultStorage(
-            input_data=InputData()
+        self.input_data: InputData = InputData(
+            load_from_file=load_from_file
+            , param_file_dict=param_file_dict
         )
+        self.result_storage: ResultStorage = None
         self.master_problem: MasterProblem = MasterProblem(
             demand_dict={},
             pattern_dict={},
         )
         self.sub_problem: SubProblem = SubProblem(
-            input_data=InputData(),
+            input_data=self.input_data,
             duals=[],
             demand_dict={},
         )
@@ -95,7 +98,9 @@ class Context:
         logging.info("Running time for date {}: {}".format(date, total_run_time))
         return date, result_storage
 
-    def run(self):
+    def run(
+            self
+    ):
 
         self.input_data.read_data()
 
@@ -103,7 +108,7 @@ class Context:
 
         self.execute_sequentially()
 
-        self.result_storage.dump()
+        return self.result_storage.dump()
 
     def execute_in_parallel(self):
         from joblib import Parallel, delayed
@@ -119,4 +124,3 @@ class Context:
     def execute_sequentially(self):
         for date in self.input_data.demand_dict:
             self.execute4specific_date(date=date)
-

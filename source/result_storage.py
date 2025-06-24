@@ -20,15 +20,23 @@ class ResultStorage:
     def dict_to_list(self, d: dict):
         result = sorted(list(chain.from_iterable([[k] * int(v) for k, v in d.items()])))
         while len(result) < self.input_data.max_cut + 1:
-            result.append('')
+            result.append(pd.NaT)
         return result
 
     def dump(self):
-        self.output_sol()
-        self.output_supply()
-        self.output_demand()
-        self.output_fulfillment()
-        self.output_kpi()
+        sol_df = self.output_sol()
+        supply_df = self.output_supply()
+        demand_df = self.output_demand()
+        fulfillment_df = self.output_fulfillment()
+        kpi_df = self.output_kpi()
+
+        return {
+            "solutionOut.csv": sol_df,
+            "supplyOut.csv": supply_df,
+            "demandOut.csv": demand_df,
+            "fulfillmentOut.csv": fulfillment_df,
+            "kpiOut.csv": kpi_df
+        }
 
     def output_sol(self):
         osh = header.OutSolutionHeader
@@ -47,10 +55,10 @@ class ResultStorage:
             for pattern_id, pattern in solutions.pattern_used_dict.items():
                 remain_qty = round(pattern.remain)
                 remain = remain_qty
-                waste = ''
+                waste = pd.NaT
                 if self.input_data.consider_waste:
-                    remain = remain_qty if remain_qty >= self.input_data.remain_low_limit else ''
-                    waste = remain_qty if remain_qty < self.input_data.remain_low_limit else ''
+                    remain = remain_qty if remain_qty >= self.input_data.remain_low_limit else pd.NaT
+                    waste = remain_qty if remain_qty < self.input_data.remain_low_limit else pd.NaT
                 record = {
                     osh.date: date,
                     osh.used_times: round(pattern.used_times),
@@ -66,7 +74,9 @@ class ResultStorage:
                 )
                 record_lt.append(record)
         sol_df = pd.DataFrame(record_lt, columns=col, dtype=object)
-        sol_df.to_csv('{}{}'.format(self.input_data.output_folder, filename.OUT_SOLUTION_FILE), index=False)
+        if self.input_data.load_from_file:
+            sol_df.to_csv('{}{}'.format(self.input_data.output_folder, filename.OUT_SOLUTION_FILE), index=False)
+        return sol_df
 
     def output_supply(self):
         osh = header.OutSupplyHeader
@@ -88,7 +98,9 @@ class ResultStorage:
             }
             record_lt.append(record)
         supply_df = pd.DataFrame(record_lt, columns=col, dtype=object)
-        supply_df.to_csv('{}{}'.format(self.input_data.output_folder, filename.OUT_SUPPLY_FILE), index=False)
+        if self.input_data.load_from_file:
+            supply_df.to_csv('{}{}'.format(self.input_data.output_folder, filename.OUT_SUPPLY_FILE), index=False)
+        return supply_df
 
     def output_demand(self):
         odh = header.OutDemandHeader
@@ -110,7 +122,10 @@ class ResultStorage:
                 record_lt.append(record)
 
         demand_df = pd.DataFrame(record_lt, columns=col, dtype=object)
-        demand_df.to_csv('{}{}'.format(self.input_data.output_folder, filename.OUT_DEMAND_FILE), index=False)
+
+        if self.input_data.load_from_file:
+            demand_df.to_csv('{}{}'.format(self.input_data.output_folder, filename.OUT_DEMAND_FILE), index=False)
+        return demand_df
 
     def output_fulfillment(self):
         ofh = header.OutFulfillmentHeader
@@ -134,7 +149,11 @@ class ResultStorage:
                     }
                     record_lt.append(record)
         fulfillment_df = pd.DataFrame(record_lt, columns=col, dtype=object)
-        fulfillment_df.to_csv('{}{}'.format(self.input_data.output_folder, filename.OUT_FULFILLMENT_FILE), index=False)
+
+        if self.input_data.load_from_file:
+            fulfillment_df.to_csv('{}{}'.format(self.input_data.output_folder, filename.OUT_FULFILLMENT_FILE),
+                                  index=False)
+        return fulfillment_df
 
     def output_kpi(self):
         okh = header.OutKpiHeader
@@ -155,7 +174,10 @@ class ResultStorage:
             }
             record_lt.append(record)
         kpi_df = pd.DataFrame(record_lt, columns=col, dtype=object)
-        kpi_df.to_csv('{}{}'.format(self.input_data.output_folder, filename.OUT_KPI_FILE), index=False)
+
+        if self.input_data.load_from_file:
+            kpi_df.to_csv('{}{}'.format(self.input_data.output_folder, filename.OUT_KPI_FILE), index=False)
+        return kpi_df
 
     # endregion
 
@@ -249,6 +271,7 @@ class ResultStorage:
             for size, demand_queue in demand_queue_by_size.items()
         }
         return supply_queue_by_size, demand_queue_by_size
+
     # endregion
 
     # region post_process
@@ -354,4 +377,3 @@ class ResultStorage:
         solution.knife_change_times = min_change
 
     # endregion
-
