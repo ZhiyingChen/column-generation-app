@@ -101,7 +101,6 @@ with st.expander("📄 示例数据：global_params.csv"):
     except FileNotFoundError:
         st.warning("未找到 data/global_params.csv 示例文件")
 
-
 with st.expander("📄 示例数据：demand.csv"):
     try:
         example_demand = pd.read_csv("data/demand.csv")
@@ -123,12 +122,18 @@ with col1:
 with col2:
     demand_file = st.file_uploader("📄 上传需求文件（demand.csv）", type="csv", key="demand")
 
+
+@st.cache_data
+def load_csv(file):
+    return pd.read_csv(file)
+
+
 global_df = None
 demand_df = None
 
 if global_params_file is not None:
     try:
-        global_df = pd.read_csv(global_params_file)
+        global_df = load_csv(global_params_file)
         st.success("✅ 全局参数文件读取成功")
         with st.expander("📄 全局参数文件: global_params.csv"):
             st.dataframe(global_df)
@@ -137,7 +142,7 @@ if global_params_file is not None:
 
 if demand_file is not None:
     try:
-        demand_df = pd.read_csv(demand_file)
+        demand_df = load_csv(demand_file)
         st.success("✅ 需求文件读取成功")
         with st.expander("📄 需求文件：demand.csv"):
             st.dataframe(demand_df)
@@ -203,7 +208,7 @@ if st.button("🚀 运行算法", disabled=run_disabled,
                 sample_row = sol_df.iloc[i]
                 segments = [v for k, v in sample_row.items()
                             if "切割方案" in k and pd.notna(v)
-                        ]
+                            ]
                 labels = [f"段{i} ({width})" for i, width in enumerate(segments)]
 
                 fig, ax = plt.subplots(figsize=(10, 1))

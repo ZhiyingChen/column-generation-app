@@ -1,6 +1,13 @@
 FROM python:3.9-slim
 
+ENV STREAMLIT_SERVER_PORT=7860
+ENV STREAMLIT_SERVER_HEADLESS=true
+ENV MPLCONFIGDIR=/tmp/mplcache
+
 WORKDIR /app
+
+# 👇 你必须确保 /tmp 是存在的（不能被误删或 copy 覆盖）
+RUN mkdir -p /tmp /tmp/mplcache && chmod -R 777 /tmp
 
 # 安装系统依赖
 RUN apt-get update && apt-get install -y \

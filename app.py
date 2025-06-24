@@ -1,5 +1,13 @@
 import streamlit as st
+import os
+import sys
 
+
+if 'win' not in sys.platform:
+    # 防止 matplotlib 和上传报错
+    os.environ["MPLCONFIGDIR"] = "/tmp/mplcache"
+    os.makedirs("/tmp", exist_ok=True)
+    os.makedirs("/tmp/mplcache", exist_ok=True)
 
 if __name__ == '__main__':
     st.set_page_config(
