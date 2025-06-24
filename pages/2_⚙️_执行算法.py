@@ -97,16 +97,16 @@ with col2:
 # 示例数据展示
 with st.expander("📄 示例数据：global_params.csv"):
     try:
-        example_global_params = pd.read_csv("data/全局参数.csv")
+        example_global_params = pd.read_csv("data/global_params.csv")
         st.dataframe(example_global_params)
         st.download_button(
             label="📥 下载全局参数示例",
             data=example_global_params.to_csv(index=False).encode('utf-8'),
-            file_name="全局参数.csv",
+            file_name="global_params.csv",
             mime="text/csv"
         )
     except FileNotFoundError:
-        st.warning("未找到 data/全局参数.csv 示例文件")
+        st.warning("未找到 data/global_params.csv 示例文件")
 
 with st.expander("📄 示例数据：demand.csv"):
     try:
@@ -128,7 +128,7 @@ if not os.path.exists(working_dir):
 
 # 保存上传的文件到工作目录
 if global_params_file:
-    with open(os.path.join(working_dir, "全局参数.csv"), "wb") as f:
+    with open(os.path.join(working_dir, "global_params.csv"), "wb") as f:
         f.write(global_params_file.read())
 if demand_file:
     with open(os.path.join(working_dir, "demand.csv"), "wb") as f:
@@ -144,7 +144,7 @@ if st.button("🚀 运行算法", disabled=run_disabled,
         try:
             # 运行 main.py
             result = subprocess.run(
-                ["python", "../main.py"],
+                ["python", "./main.py"],
                 cwd=working_dir,
                 capture_output=True,
                 text=True
