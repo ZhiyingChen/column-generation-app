@@ -5,8 +5,6 @@ import subprocess
 import matplotlib.pyplot as plt
 import matplotlib
 import pylab
-import shutil
-import sys
 
 # 设置使用的字体（需要显示中文的时候使用）
 font = {'family': 'SimHei'}
@@ -87,6 +85,7 @@ with st.expander("📦 输出文件说明：supplyOut.csv / demandOut.csv / fulf
 这些用于分析方案对需求的满足匹配情况，可用于生成追踪表、KPI 和图示。
 """)
 
+
 st.header("📥 上传文件")
 col1, col2 = st.columns(2)
 
@@ -122,58 +121,17 @@ with st.expander("📄 示例数据：demand.csv"):
     except FileNotFoundError:
         st.warning("未找到 data/demand.csv 示例文件")
 
-# 1. 上传路径
-if 'win' in sys.platform:
-    upload_dir = "./tmp"
-    if not os.path.exists(upload_dir):
-        os.mkdir(upload_dir)
-else:
-    upload_dir = "/tmp"
+# 工作目录
+working_dir = "./"
+if not os.path.exists(working_dir):
+    os.mkdir(working_dir)
 
-
-def clean_upload_dir(upload_dir: str = "/tmp"):
-    import os, glob, shutil
-    # 删除 main.py
-    main_path = os.path.join(upload_dir, "main.py")
-    if os.path.exists(main_path):
-        os.remove(main_path)
-    # 删除 source 文件夹
-    source_path = os.path.join(upload_dir, "source")
-    if os.path.exists(source_path) and os.path.isdir(source_path):
-        shutil.rmtree(source_path)
-    # 删除所有 .csv 文件
-    for f in glob.glob(os.path.join(upload_dir, "*.csv")):
-        try:
-            os.remove(f)
-        except Exception as e:
-            print(f"⚠️ 删除失败：{f}, 错误：{e}")
-
-
-clean_upload_dir(
-    upload_dir=upload_dir
-)
-# 2. 把 main.py 和其它必要文件复制进去
-# 找到 pages 的上一级目录
-project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-# 先清空 upload_dir
-
-shutil.copy(os.path.join(project_dir, "main.py"), os.path.join(upload_dir, "main.py"))
-# main.py 有依赖的 source/ 等子目录，也一并复制过去（可用 shutil.copytree）
-shutil.copytree(os.path.join(project_dir, "source"), os.path.join(upload_dir, "source"))
-
-# 3. 再复制上传的文件
+# 保存上传的文件到工作目录
 if global_params_file:
-    if global_params_file:
-        try:
-            save_path = os.path.join(upload_dir, "global_params.csv")
-            with open(save_path, "wb") as f:
-                f.write(global_params_file.read())
-            st.success(f"✅ 上传成功：{save_path}")
-        except Exception as e:
-            st.error(f"❌ 文件保存失败：{e}")
-
+    with open(os.path.join(working_dir, "global_params.csv"), "wb") as f:
+        f.write(global_params_file.read())
 if demand_file:
-    with open(os.path.join(upload_dir, "demand.csv"), "wb") as f:
+    with open(os.path.join(working_dir, "demand.csv"), "wb") as f:
         f.write(demand_file.read())
 
 # 判断是否禁用运行按钮
@@ -186,8 +144,8 @@ if st.button("🚀 运行算法", disabled=run_disabled,
         try:
             # 运行 main.py
             result = subprocess.run(
-                ["python", "main.py"],
-                cwd=upload_dir,
+                ["python", "./main.py"],
+                cwd=working_dir,
                 capture_output=True,
                 text=True
             )
@@ -203,7 +161,7 @@ if st.button("🚀 运行算法", disabled=run_disabled,
     st.header("📊 输出结果")
 
     # 展示输出文件
-    output_dir = os.path.join(upload_dir, "output")
+    output_dir = os.path.join(working_dir, "output")
     output_files = {
         "切割方案 (solutionOut.csv)": "solutionOut.csv",
         "KPI指标 (kpiOut.csv)": "kpiOut.csv",
