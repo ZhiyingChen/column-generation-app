@@ -100,6 +100,7 @@ with st.expander("📄 示例数据：global_params.csv"):
     except FileNotFoundError:
         st.warning("未找到 data/global_params.csv 示例文件")
 
+st.header("📄 示例输入数据")
 with st.expander("📄 示例数据：demand.csv"):
     try:
         example_demand = pd.read_csv("data/demand.csv")
