@@ -1,3 +1,15 @@
+---
+title: Column Generation App
+emoji: 🧩
+colorFrom: indigo
+colorTo: blue
+sdk: streamlit
+sdk_version: "1.33.0"
+app_file: app.py
+pinned: false
+---
+
+
 # 📦 切割优化与列生成算法（Column Generation for Multi-Day Cutting Plan）
 
 ---
