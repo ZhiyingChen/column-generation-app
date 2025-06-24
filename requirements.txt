@@ -1,3 +1,5 @@
-altair
-pandas
-streamlit
+joblib==1.4.2
+matplotlib==3.7.5
+pandas==2.0.3
+Pyomo==6.8.0
+streamlit==1.40.1
