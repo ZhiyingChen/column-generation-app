@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get update && apt-get install -y glpk-utils && rm -rf /var/lib/apt/lists/*
 
 
-COPY requirements.txt ./
+# 然后复制所有代码（包括 app.py）
+COPY . .
 
 RUN pip3 install -r requirements.txt
 
