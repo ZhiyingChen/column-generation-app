@@ -122,7 +122,7 @@ with st.expander("📄 示例数据：demand.csv"):
         st.warning("未找到 data/demand.csv 示例文件")
 
 # 工作目录
-working_dir = "./working_dir"
+working_dir = "./"
 if not os.path.exists(working_dir):
     os.mkdir(working_dir)
 
