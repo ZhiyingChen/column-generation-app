@@ -2,6 +2,7 @@ output/
 __pycache__/
 .idea/
 datasets/
+tmp/
 *.log
 *.xml
 *.xlsx
