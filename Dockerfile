@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     git \
     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y glpk-utils && rm -rf /var/lib/apt/lists/*
+
 
 COPY requirements.txt ./
 COPY src/ ./src/
