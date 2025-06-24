@@ -87,6 +87,7 @@ with st.expander("📦 输出文件说明：supplyOut.csv / demandOut.csv / fulf
 """)
 
 # 示例数据展示
+st.header("📄 示例输入数据")
 with st.expander("📄 示例数据：global_params.csv"):
     try:
         example_global_params = pd.read_csv("data/global_params.csv")
@@ -100,7 +101,7 @@ with st.expander("📄 示例数据：global_params.csv"):
     except FileNotFoundError:
         st.warning("未找到 data/global_params.csv 示例文件")
 
-st.header("📄 示例输入数据")
+
 with st.expander("📄 示例数据：demand.csv"):
     try:
         example_demand = pd.read_csv("data/demand.csv")
