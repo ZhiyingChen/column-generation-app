@@ -176,9 +176,8 @@ if st.button("🚀 运行算法"):
             for i in range(min(5, len(sol_df))):
                 sample_row = sol_df.iloc[i]
                 segments = [v for k, v in sample_row.items()
-                            if "切割方案" in k and pd.notna(v)
-                            ]
-                labels = [f"段{i} ({width})" for i, width in enumerate(segments)]
+                            if "切割方案" in k and pd.notna(v)]
+                labels = [f"Segment {i} ({width})" for i, width in enumerate(segments)]
 
                 fig, ax = plt.subplots(figsize=(10, 1))
                 left = 0
@@ -190,5 +189,5 @@ if st.button("🚀 运行算法"):
                     left += width
                 ax.set_xlim(0, left)
                 ax.axis('off')
-                ax.set_title(f"方案 {i} - 母卷切割段宽示意图")
+                ax.set_title(f"Solution {i} -Sample Display")  # 如果需要显示中文标题，请替换为英文标题
                 st.pyplot(fig)
