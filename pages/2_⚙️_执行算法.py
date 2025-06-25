@@ -114,47 +114,16 @@ with st.expander("📄 示例数据：demand.csv"):
     except FileNotFoundError:
         st.warning("未找到 data/demand.csv 示例文件")
 
-st.header("📥 上传文件")
-col1, col2 = st.columns(2)
-
-with col1:
-    global_params_file = st.file_uploader("📄 上传全局参数文件（global_params.csv）", type="csv", key="global_params")
-with col2:
-    demand_file = st.file_uploader("📄 上传需求文件（demand.csv）", type="csv", key="demand")
-
-
 @st.cache_data
 def load_csv(file):
     return pd.read_csv(file)
 
 
-global_df = None
-demand_df = None
-
-if global_params_file is not None:
-    try:
-        global_df = load_csv(global_params_file)
-        st.success("✅ 全局参数文件读取成功")
-        with st.expander("📄 全局参数文件: global_params.csv"):
-            st.dataframe(global_df)
-    except Exception as e:
-        st.error(f"❌ 读取全局参数失败：{e}")
-
-if demand_file is not None:
-    try:
-        demand_df = load_csv(demand_file)
-        st.success("✅ 需求文件读取成功")
-        with st.expander("📄 需求文件：demand.csv"):
-            st.dataframe(demand_df)
-    except Exception as e:
-        st.error(f"❌ 读取需求文件失败：{e}")
-
-# 判断是否禁用运行按钮
-run_disabled = not (global_params_file and demand_file)
+global_df = example_global_params
+demand_df = example_demand
 
 # 显示运行按钮
-if st.button("🚀 运行算法", disabled=run_disabled,
-             help="请先上传所需的两个输入文件" if run_disabled else "点击运行算法"):
+if st.button("🚀 运行算法"):
     with st.spinner("算法运行中，请稍候..."):
         try:
             context = Context(
