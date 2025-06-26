@@ -87,40 +87,37 @@ with st.expander("📦 输出文件说明：supplyOut.csv / demandOut.csv / fulf
 """)
 
 # 示例数据展示
-st.header("📄 示例输入数据")
-with st.expander("📄 示例数据：global_params.csv"):
-    try:
-        example_global_params = pd.read_csv("data/global_params.csv")
-        st.dataframe(example_global_params)
-        st.download_button(
-            label="📥 下载全局参数示例",
-            data=example_global_params.to_csv(index=False).encode('utf-8'),
-            file_name="global_params.csv",
-            mime="text/csv"
-        )
-    except FileNotFoundError:
-        st.warning("未找到 data/global_params.csv 示例文件")
-
-with st.expander("📄 示例数据：demand.csv"):
-    try:
-        example_demand = pd.read_csv("data/demand.csv")
-        st.dataframe(example_demand)
-        st.download_button(
-            label="📥 下载需求示例",
-            data=example_demand.to_csv(index=False).encode('utf-8'),
-            file_name="demand.csv",
-            mime="text/csv"
-        )
-    except FileNotFoundError:
-        st.warning("未找到 data/demand.csv 示例文件")
+st.header("📄 示例输入数据（可编辑）")
 
 @st.cache_data
 def load_csv(file):
     return pd.read_csv(file)
 
+# 加载示例数据
+global_df = load_csv("data/global_params.csv")
+demand_df = load_csv("data/demand.csv")
 
-global_df = example_global_params
-demand_df = example_demand
+# 可编辑的 DataFrame
+with st.expander("📝 编辑全局参数"):
+    edited_global_df = st.data_editor(global_df, num_rows="dynamic")
+    # 下载按钮
+    st.download_button(
+        label="📥 下载编辑后的 global_params.csv",
+        data=edited_global_df.to_csv(index=False).encode('utf-8'),
+        file_name="global_params_modified.csv",
+        mime="text/csv"
+    )
+
+with st.expander("📝 编辑需求数据"):
+    edited_demand_df = st.data_editor(demand_df, num_rows="dynamic")
+    # 下载按钮
+    st.download_button(
+        label="📥 下载编辑后的 demand.csv",
+        data=edited_demand_df.to_csv(index=False).encode('utf-8'),
+        file_name="demand_modified.csv",
+        mime="text/csv"
+    )
+
 
 # 显示运行按钮
 if st.button("🚀 运行算法"):
@@ -129,8 +126,8 @@ if st.button("🚀 运行算法"):
             context = Context(
                 load_from_file=False,
                 param_file_dict={
-                    "global_params.csv": global_df,
-                    "demand.csv": demand_df
+                    "global_params.csv": edited_global_df,
+                    "demand.csv": edited_demand_df
                 }
             )
             output_files = context.run(
