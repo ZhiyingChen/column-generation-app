@@ -1,4 +1,5 @@
 import streamlit as st
+from web import function
 
 st.title("📘 项目背景与说明")
 
@@ -40,4 +41,5 @@ with st.expander("📥 示例输出格式"):
 
 """)
 
+function.render_footer()
 

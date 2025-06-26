@@ -1,11 +1,10 @@
 import streamlit as st
 import pandas as pd
-import os
-import subprocess
 import matplotlib.pyplot as plt
 import matplotlib
 import pylab
 from source.context import Context
+from web import function
 
 # 设置使用的字体（需要显示中文的时候使用）
 font = {'family': 'SimHei'}
@@ -188,3 +187,6 @@ if st.button("🚀 运行算法"):
                 ax.axis('off')
                 ax.set_title(f"Solution {i} -Sample Display")  # 如果需要显示中文标题，请替换为英文标题
                 st.pyplot(fig)
+
+
+function.render_footer()
