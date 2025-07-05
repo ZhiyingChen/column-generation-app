@@ -6,18 +6,6 @@ import pylab
 from source.context import Context
 from web import function
 
-# 设置使用的字体（需要显示中文的时候使用）
-font = {'family': 'SimHei'}
-# 设置显示中文,与字体配合使用
-matplotlib.rc('font', **font)
-matplotlib.rcParams['axes.unicode_minus'] = False
-params = {'legend.fontsize': 'x-large',
-          'axes.labelsize': 'x-large',
-          'axes.titlesize': 'x-large',
-          'xtick.labelsize': 'x-large',
-          'ytick.labelsize': 'x-large'}
-pylab.rcParams.update(params)
-
 st.title("⚙️ 执行卷纸切割算法")
 
 st.markdown(
