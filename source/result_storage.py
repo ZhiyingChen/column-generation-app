@@ -31,11 +31,11 @@ class ResultStorage:
         kpi_df = self.output_kpi()
 
         return {
+            "kpiOut.csv": kpi_df,
             "solutionOut.csv": sol_df,
             "supplyOut.csv": supply_df,
             "demandOut.csv": demand_df,
-            "fulfillmentOut.csv": fulfillment_df,
-            "kpiOut.csv": kpi_df
+            "fulfillmentOut.csv": fulfillment_df
         }
 
     def output_sol(self):
