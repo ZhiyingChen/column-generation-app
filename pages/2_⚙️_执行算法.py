@@ -6,18 +6,6 @@ import pylab
 from source.context import Context
 from web import function
 
-# 设置使用的字体（需要显示中文的时候使用）
-font = {'family': 'SimHei'}
-# 设置显示中文,与字体配合使用
-matplotlib.rc('font', **font)
-matplotlib.rcParams['axes.unicode_minus'] = False
-params = {'legend.fontsize': 'x-large',
-          'axes.labelsize': 'x-large',
-          'axes.titlesize': 'x-large',
-          'xtick.labelsize': 'x-large',
-          'ytick.labelsize': 'x-large'}
-pylab.rcParams.update(params)
-
 st.title("⚙️ 执行卷纸切割算法")
 
 st.markdown(
@@ -140,8 +128,8 @@ if st.button("🚀 运行算法"):
     st.header("📊 输出结果")
 
     output_files_label = {
-        "solutionOut.csv": "切割方案 (solutionOut.csv)",
         "kpiOut.csv": "KPI指标 (kpiOut.csv)",
+        "solutionOut.csv": "切割方案 (solutionOut.csv)",
         "supplyOut.csv": "供给结果 (supplyOut.csv)",
         "demandOut.csv": "需求满足情况 (demandOut.csv)",
         "fulfillmentOut.csv": "供需匹配 (fulfillmentOut.csv)"
@@ -149,7 +137,8 @@ if st.button("🚀 运行算法"):
 
     # 展示输出文件
     for filename, df in output_files.items():
-        with st.expander("📄 {}".format(output_files_label[filename])):
+        if filename == "kpiOut.csv":
+            st.subheader("🎯 关键指标")
             st.dataframe(df)
 
             st.download_button(
@@ -158,6 +147,16 @@ if st.button("🚀 运行算法"):
                 file_name=filename,
                 mime="text/csv"
             )
+        else:
+            with st.expander("📄 {}".format(output_files_label[filename])):
+                st.dataframe(df)
+
+                st.download_button(
+                    label=f"📥 下载 {filename}",
+                    data=df.to_csv(index=False),
+                    file_name=filename,
+                    mime="text/csv"
+                )
 
         if filename != "solutionOut.csv":
             continue
