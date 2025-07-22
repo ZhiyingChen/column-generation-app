@@ -3,6 +3,10 @@ __pycache__/
 .idea/
 datasets/
 tmp/
+build/
+dist/
+launch_app.py
+*.spec
 *.log
 *.xml
 *.xlsx
