@@ -1,5 +1,5 @@
 import streamlit as st
-from web.language_dict import APP_LANG, ROLL_DOC_LANG
+from web.language_dict import APP_LANG, ROLL_DOC_LANG, ALGO_DOC_LANG
 
 def render_language_selector():
     """在 sidebar 渲染语言选择器，并更新 session_state"""
@@ -14,6 +14,8 @@ def get_language_dict(page: str = "app"):
         return lang, APP_LANG[lang]
     elif page == "doc":
         return lang, ROLL_DOC_LANG[lang]
+    elif page == "algo":
+        return lang, ALGO_DOC_LANG[lang]
     else:
         raise ValueError("Unknown page type. Use 'app', 'algo', 'doc'.")
 
