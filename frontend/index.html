@@ -28,23 +28,31 @@
     <header class="topbar"><div class="breadcrumb">生产优化 <span>/</span> <strong>多日期切割排程</strong></div><a id="docsLink" class="text-link" target="_blank" rel="noopener">API 文档 ↗</a></header>
 
     <section id="problem" class="overview">
-      <div class="page-heading"><div><div class="eyebrow"><span></span> 01 / PROBLEM</div><h1>多规格订单，如何用<em>更少原料</em>完成？</h1><p>这是一个多日期一维下料问题：在满足各规格订单的前提下，组合可执行的切割模式，减少原料卷使用并控制边损与余料。</p></div></div>
+      <div class="page-heading"><div><div class="eyebrow"><span></span> 01 / PROBLEM</div><h1>每天最少需要多少卷<em>原纸卷</em>？</h1><p>根据每天新增的短纸卷订单，在切割次数、边损和补库规则约束下，计算当天最少需要使用多少卷原纸卷，并给出每卷原纸卷的具体切割方案。</p></div></div>
       <article class="hero-panel problem-hero">
-        <div class="hero-copy"><span class="pill">CUTTING STOCK OPTIMIZATION</span><h2>从订单需求，到生产可执行方案。</h2><p>每天有不同幅宽和数量的订单。每卷原料宽度固定、切割次数有限，剩余部分还需要在可复用余料与废料之间做判断。</p><div class="hero-tags"><span>满足每日需求</span><span>减少原料卷数</span><span>控制余料与边损</span></div></div>
+        <div class="hero-copy"><span class="pill">CUTTING STOCK OPTIMIZATION</span><h2>把固定长度的原纸卷，切成客户需要的短纸卷。</h2><p>例如，一卷原纸卷长度为 5,450mm；客户每天会新增多笔 200mm、300mm 等不同长度和数量的短纸卷需求。模型需要安排每卷原纸卷怎么切。</p><div class="hero-tags"><span>原料：5,450mm 原纸卷</span><span>需求：多种短纸卷</span><span>按日期满足订单</span></div></div>
         <div class="roll-art" aria-hidden="true"><div class="art-axis">RAW ROLL → CUTTING PATTERN</div><div class="art-roll"><i>2250</i><i>1820</i><i>1300</i><i></i></div><div class="art-roll second"><i>2050</i><i>1700</i><i>1650</i><i></i></div><div class="art-dimension"><span>↤</span> 5,450 mm <span>↦</span></div><div class="art-badge">目标：更少原料卷</div></div>
       </article>
-      <div class="problem-grid">
-        <article class="problem-card"><span>输入</span><h3>订单与生产约束</h3><p>日期、需求幅宽和数量，以及原始卷宽、最大切割次数、边损与余料阈值。</p></article>
-        <article class="problem-card"><span>决策</span><h3>切割模式与使用次数</h3><p>决定每种切割组合如何构成，以及每个生产日期需要使用多少套该模式。</p></article>
-        <article class="problem-card"><span>输出</span><h3>可执行的生产计划</h3><p>每日用卷、切割方案、供需履约关系、余料边损和核心生产 KPI。</p></article>
+      <div class="definition-grid">
+        <article class="definition-card"><span class="definition-number">01</span><div><h3>原料是什么？</h3><p>固定长度的原纸卷。例如每卷长度为 <strong>5,450mm</strong>，模型计算每天需要使用多少卷。</p></div></article>
+        <article class="definition-card"><span class="definition-number">02</span><div><h3>客户需要什么？</h3><p>不同长度的短纸卷，例如 <strong>200mm、300mm</strong>。每天都会新增多笔不同长度和数量的订单。</p></div></article>
       </div>
-      <div class="problem-flow" aria-label="问题求解流程"><span>订单需求</span><i>→</i><span>生成候选模式</span><i>→</i><span>选择模式套数</span><i>→</i><span>生产执行计划</span></div>
+      <div class="constraint-block">
+        <div class="constraint-heading"><span>生产约束</span><h3>每卷原纸卷不能随意切割</h3></div>
+        <div class="constraint-grid">
+          <article><strong>最大切割次数</strong><p>每卷原纸卷最多切割指定次数，例如最多切 4 次。</p></article>
+          <article><strong>边损阈值</strong><p>切割后剩余长度小于阈值时视为损耗，例如不足 50mm 记为边损。</p></article>
+          <article><strong>余量阈值与补库</strong><p>按你的业务口径，剩余长度在边损阈值以上、余量阈值以下，例如 50–1,500mm，可切成未来订单需要的短纸卷，提前补库。</p></article>
+        </div>
+      </div>
+      <div class="question-card"><span>需要模型回答的问题</span><h2>在上述约束下，每天最少使用多少卷原纸卷，才能满足客户需求？</h2><p>模型输出两类核心结果：<strong>① 每天需要的原纸卷数量</strong><strong>② 每种原纸卷切割方案及使用次数</strong></p></div>
+      <div class="logic-warning"><strong>当前算法口径提示</strong><span>现有代码将剩余量定义为：≤ 边损上限，或 ≥ 余量下限；这与“50–1,500mm 可补库”的业务口径相反。当前页面先如实说明差异，算法尚未改动。</span></div>
     </section>
 
     <section id="inputs">
       <div class="section-heading"><div><span class="section-number">02 / CONFIGURE & RUN</span><h2>配置参数，运行模型</h2></div><button id="loadExample" class="button secondary">↺ 加载项目示例</button></div>
       <div class="input-grid">
-        <article class="card demand-card"><div class="card-header"><div><h3>订单需求</h3><p>直接编辑 CSV，或导入 UTF-8 编码文件。</p></div><label class="button small secondary" for="csvUpload">↑ 导入 CSV</label><input id="csvUpload" type="file" accept=".csv,text/csv" hidden></div><label class="sr-only" for="demandEditor">订单需求 CSV</label><textarea id="demandEditor" spellcheck="false" placeholder="幅宽,订单件数,移库日期"></textarea><div class="editor-footer"><span id="editorStats">—</span><button class="text-button" id="previewButton">刷新数据预览 ↗</button></div><div id="inputPreview" class="table-scroll preview-table"></div></article>
+        <article class="card demand-card"><div class="card-header"><div><h3>每日短纸卷需求</h3><p>每行表示某一天、一种短纸卷长度及其需求数量。CSV 中“幅宽”是原算法字段名，在本业务中表示短纸卷长度。</p></div><label class="button small secondary" for="csvUpload">↑ 导入 CSV</label><input id="csvUpload" type="file" accept=".csv,text/csv" hidden></div><label class="sr-only" for="demandEditor">每日短纸卷需求 CSV</label><textarea id="demandEditor" spellcheck="false" placeholder="幅宽（短纸卷长度）,订单件数,移库日期"></textarea><div class="editor-footer"><span id="editorStats">—</span><button class="text-button" id="previewButton">刷新数据预览 ↗</button></div><div id="inputPreview" class="table-scroll preview-table"></div></article>
         <article class="card parameter-card"><div class="card-header"><div><h3>模型参数</h3><p>配置原料、切割、边损与余料约束。</p></div><span class="parameter-icon">⚙</span></div><div id="parameterFields" class="parameter-fields"></div><div class="model-note">边损下限可为负数。参数变化后需要重新运行模型，已有结果不会自动更新。</div></article>
       </div>
       <article class="run-panel run-workbench"><div><div class="panel-heading"><span class="tiny-label">MODEL EXECUTION</span><span class="pill light" id="runBadge">待运行</span></div><h3 id="runTitle">检查输入并启动模型</h3><p id="runDescription">确认订单需求和模型参数后，运行真实列生成算法。</p></div><div class="run-meta"><div><span>输入记录</span><strong id="inputCount">—</strong></div><div><span>计划天数</span><strong id="dayCount">—</strong></div><div><span>已用时间</span><strong id="elapsed">0.0s</strong></div></div><div class="run-action"><div class="progress-track"><div id="progressBar"></div></div><button class="button primary" id="runButton">▶ 运行列生成算法 <span>↗</span></button><small>保留原有模型 · 单任务最长 300 秒</small></div></article>
