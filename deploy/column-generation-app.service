@@ -10,7 +10,7 @@ WorkingDirectory=/opt/column_generation_app
 Environment=PYTHONUNBUFFERED=1
 Environment=APP_BASE_PATH=/column-generation
 Environment=ALLOWED_ORIGINS=http://43.163.3.74
-ExecStart=/opt/column_generation_app/.venv/bin/uvicorn api.main:app --host 127.0.0.1 --port 8091 --workers 1 --limit-concurrency 30
+ExecStart=/opt/column_generation_app/.venv/bin/uvicorn api.main:app --host 127.0.0.1 --port 8091 --root-path /column-generation --workers 1 --limit-concurrency 30
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=15

@@ -12,7 +12,7 @@
 
 修改前备份 /etc/caddy/Caddyfile 为 Caddyfile.bak.column-generation-<timestamp>。仅将 caddy-route.txt 插入已有 http://43.163.3.74 块内，位于原 reverse_proxy 前；原根路径代理与域名块不变。
 
-先运行 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile，通过后才 systemctl reload caddy。失败则恢复本次备份并验证。入口 /column-generation/ 跳转到 /column-generation/studio/。前端资源相对寻址，API 为 ../api/，APP_BASE_PATH=/column-generation 保证文档前缀正确。
+先运行 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile，通过后才 systemctl reload caddy。失败则恢复本次备份并验证。入口 /column-generation/ 跳转到 /column-generation/studio/。前端资源相对寻址，API 为 ../api/。APP_BASE_PATH=/column-generation 与 Uvicorn --root-path /column-generation 必须同时设置，保证静态挂载、路由及文档前缀正确。
 
 部署前后比对已有服务 PID 与 active 时间，并检查根路径及原域名代理。回滚仅停止本服务并撤回新增路由，验证后热加载，不改其他应用目录。
 
