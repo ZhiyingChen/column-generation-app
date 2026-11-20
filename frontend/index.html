@@ -41,12 +41,12 @@
         <div class="constraint-heading"><span>生产约束</span><h3>每卷原纸卷不能随意切割</h3></div>
         <div class="constraint-grid">
           <article><strong>最大切割次数</strong><p>每卷原纸卷最多切割指定次数，例如最多切 4 次。</p></article>
-          <article><strong>边损阈值</strong><p>切割后剩余长度小于阈值时视为损耗，例如不足 50mm 记为边损。</p></article>
-          <article><strong>余量阈值与补库</strong><p>按你的业务口径，剩余长度在边损阈值以上、余量阈值以下，例如 50–1,500mm，可切成未来订单需要的短纸卷，提前补库。</p></article>
+          <article><strong>边损上限</strong><p>切割后剩余长度不超过边损上限时，算法将其记为边损。例如边损上限为 50mm，剩余 0–50mm 计入边损。</p></article>
+          <article><strong>余量下限与补库</strong><p>切割后剩余长度达到余量下限时，算法才将其作为可用余料。开启补库后，余料可以继续切割，用于满足后续日期的短纸卷需求。</p></article>
         </div>
       </div>
       <div class="question-card"><span>需要模型回答的问题</span><h2>在上述约束下，每天最少使用多少卷原纸卷，才能满足客户需求？</h2><p>模型输出两类核心结果：<strong>① 每天需要的原纸卷数量</strong><strong>② 每种原纸卷切割方案及使用次数</strong></p></div>
-      <div class="logic-warning"><strong>当前算法口径提示</strong><span>现有代码将剩余量定义为：≤ 边损上限，或 ≥ 余量下限；这与“50–1,500mm 可补库”的业务口径相反。当前页面先如实说明差异，算法尚未改动。</span></div>
+      <div class="logic-warning"><strong>算法判定口径</strong><span>当前模型只接受两类剩余状态：不超过边损上限的部分计为边损；达到余量下限的部分计为可用余料。位于边损上限与余量下限之间的剩余长度，不作为模型允许的最终状态。</span></div>
     </section>
 
     <section id="inputs">
