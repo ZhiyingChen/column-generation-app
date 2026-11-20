@@ -3,40 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="以列生成算法驱动多日期卷材切割优化，连接真实 Pyomo 与 GLPK 求解器。">
+  <meta name="description" content="多日期卷材切割优化与列生成算法工作台">
   <title>Column Studio · 列生成切割优化</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23132f2c'/%3E%3Cpath d='M10 10h5v20h-5zm8 5h5v15h-5zm8-8h5v23h-5z' fill='%23c5ed9d'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="workflow.css">
   <script src="app.js" defer></script>
 </head>
 <body>
   <aside class="sidebar">
-    <a class="brand" href="#overview"><span class="brand-icon">▥</span><span>Column<span class="brand-light"> Studio</span><small>OPTIMIZATION WORKSPACE</small></span></a>
-    <div class="workspace-label">工作空间 <span>01</span></div>
+    <a class="brand" href="#problem"><span class="brand-icon">▥</span><span>Column<span class="brand-light"> Studio</span><small>OPTIMIZATION WORKSPACE</small></span></a>
+    <div class="workspace-label">工作流程 <span>01—04</span></div>
     <nav aria-label="主要导航">
-      <a class="nav-link active" href="#overview"><span>◫</span>优化工作台<span class="nav-number">01</span></a>
-      <a class="nav-link" href="#inputs"><span>▤</span>需求与参数<span class="nav-number">02</span></a>
-      <a class="nav-link" href="#results"><span>▥</span>切割方案<span class="nav-number">03</span></a>
+      <a class="nav-link active" href="#problem"><span>◫</span>问题描述<span class="nav-number">01</span></a>
+      <a class="nav-link" href="#inputs"><span>▤</span>配置与运行<span class="nav-number">02</span></a>
+      <a class="nav-link" href="#results"><span>▥</span>结果展示<span class="nav-number">03</span></a>
       <a class="nav-link" href="#method"><span>◎</span>算法说明<span class="nav-number">04</span></a>
     </nav>
-    <div class="sidebar-note"><span class="tiny-label">THE ENGINE</span><strong>更少原料，<br>更多可能。</strong><p>从有限的初始模式出发，<br>逐步发现更好的切割组合。</p><div class="mini-roll"><i></i><i></i><i></i><i></i><i></i></div></div>
+    <div class="sidebar-note"><span class="tiny-label">THE OBJECTIVE</span><strong>更少原料，<br>满足需求。</strong><p>在切割次数、边损和余料约束下，生成可执行的生产计划。</p><div class="mini-roll"><i></i><i></i><i></i><i></i><i></i></div></div>
     <div class="sidebar-footer"><span class="status-dot" id="healthDot"></span><div><strong id="healthLabel">正在连接求解器</strong><small>Pyomo + GLPK · 独立实例</small></div></div>
   </aside>
+
   <main>
     <header class="topbar"><div class="breadcrumb">生产优化 <span>/</span> <strong>多日期切割排程</strong></div><a id="docsLink" class="text-link" target="_blank" rel="noopener">API 文档 ↗</a></header>
-    <section id="overview" class="overview">
-      <div class="page-heading"><div><div class="eyebrow"><span></span> COLUMN GENERATION / 列生成</div><h1>让每一卷原料，<em>物尽其用。</em></h1><p>把订单需求转化为可执行的切割方案。用真实算法，找到材料与效率之间的更优解。</p></div><button id="loadExample" class="button secondary">↺ 加载项目示例</button></div>
-      <div class="hero-grid">
-        <article class="hero-panel"><div class="hero-copy"><span class="pill">CUTTING STOCK OPTIMIZATION</span><h2>小切口，大优化。</h2><p>需求聚合 → 模式生成 → 整数排程<br>为多规格、多日期订单生成切割计划。</p><div class="hero-tags"><span>多日期排程</span><span>余料管理</span><span>真实求解</span></div></div><div class="roll-art" aria-hidden="true"><div class="art-axis">MATERIAL → PATTERNS</div><div class="art-roll"><i>2250</i><i>1820</i><i>1300</i><i></i></div><div class="art-roll second"><i>2050</i><i>1700</i><i>1650</i><i></i></div><div class="art-dimension"><span>↤</span> 5,450 mm <span>↦</span></div><div class="art-badge">+ 新的切割模式</div></div></article>
-        <article class="run-panel"><div class="panel-heading"><span class="tiny-label">SOLVER SESSION</span><span class="pill light" id="runBadge">待运行</span></div><h3 id="runTitle">准备好，开始优化</h3><p id="runDescription">加载示例或编辑需求后，启动列生成求解。</p><div class="run-meta"><div><span>输入记录</span><strong id="inputCount">—</strong></div><div><span>计划天数</span><strong id="dayCount">—</strong></div><div><span>已用时间</span><strong id="elapsed">0.0s</strong></div></div><div class="progress-track"><div id="progressBar"></div></div><button class="button primary" id="runButton">▶ 运行列生成算法 <span>↗</span></button><div class="run-footnote">保留原有模型 · 单任务最长 300 秒</div></article>
+
+    <section id="problem" class="overview">
+      <div class="page-heading"><div><div class="eyebrow"><span></span> 01 / PROBLEM</div><h1>多规格订单，如何用<em>更少原料</em>完成？</h1><p>这是一个多日期一维下料问题：在满足各规格订单的前提下，组合可执行的切割模式，减少原料卷使用并控制边损与余料。</p></div></div>
+      <article class="hero-panel problem-hero">
+        <div class="hero-copy"><span class="pill">CUTTING STOCK OPTIMIZATION</span><h2>从订单需求，到生产可执行方案。</h2><p>每天有不同幅宽和数量的订单。每卷原料宽度固定、切割次数有限，剩余部分还需要在可复用余料与废料之间做判断。</p><div class="hero-tags"><span>满足每日需求</span><span>减少原料卷数</span><span>控制余料与边损</span></div></div>
+        <div class="roll-art" aria-hidden="true"><div class="art-axis">RAW ROLL → CUTTING PATTERN</div><div class="art-roll"><i>2250</i><i>1820</i><i>1300</i><i></i></div><div class="art-roll second"><i>2050</i><i>1700</i><i>1650</i><i></i></div><div class="art-dimension"><span>↤</span> 5,450 mm <span>↦</span></div><div class="art-badge">目标：更少原料卷</div></div>
+      </article>
+      <div class="problem-grid">
+        <article class="problem-card"><span>输入</span><h3>订单与生产约束</h3><p>日期、需求幅宽和数量，以及原始卷宽、最大切割次数、边损与余料阈值。</p></article>
+        <article class="problem-card"><span>决策</span><h3>切割模式与使用次数</h3><p>决定每种切割组合如何构成，以及每个生产日期需要使用多少套该模式。</p></article>
+        <article class="problem-card"><span>输出</span><h3>可执行的生产计划</h3><p>每日用卷、切割方案、供需履约关系、余料边损和核心生产 KPI。</p></article>
       </div>
-      <div class="notice" id="notice" role="status" aria-live="polite">正在加载项目数据…</div>
-      <div class="kpi-grid"><article><div class="kpi-label">原料使用 <span>▥</span></div><div class="kpi-value" id="kpiRolls">—</div><p>原始纸卷 / 卷</p></article><article><div class="kpi-label">切割方案 <span>◫</span></div><div class="kpi-value" id="kpiPatterns">—</div><p>已使用模式 / 种</p></article><article><div class="kpi-label">材料利用率 <span>↗</span></div><div class="kpi-value" id="kpiUtilization">—</div><p>产出幅宽 ÷ 投入幅宽</p></article><article><div class="kpi-label">需求满足率 <span>✓</span></div><div class="kpi-value" id="kpiFulfillment">—</div><p>按订单数量计算</p></article></div>
+      <div class="problem-flow" aria-label="问题求解流程"><span>订单需求</span><i>→</i><span>生成候选模式</span><i>→</i><span>选择模式套数</span><i>→</i><span>生产执行计划</span></div>
     </section>
-    <section id="inputs"><div class="section-heading"><div><span class="section-number">01 / INPUT</span><h2>定义你的生产场景</h2></div><span class="muted">输入改变后，需重新运行以更新结果</span></div><div class="input-grid"><article class="card demand-card"><div class="card-header"><div><h3>订单需求</h3><p>直接编辑 CSV，或导入 UTF-8 编码文件。</p></div><label class="button small secondary" for="csvUpload">↑ 导入 CSV</label><input id="csvUpload" type="file" accept=".csv,text/csv" hidden></div><label class="sr-only" for="demandEditor">订单需求 CSV</label><textarea id="demandEditor" spellcheck="false" placeholder="幅宽,订单件数,移库日期"></textarea><div class="editor-footer"><span id="editorStats">—</span><button class="text-button" id="previewButton">刷新数据预览 ↗</button></div><div id="inputPreview" class="table-scroll preview-table"></div></article><article class="card parameter-card"><div class="card-header"><div><h3>模型参数</h3><p>沿用原算法的参数语义与约束。</p></div><span class="parameter-icon">⚙</span></div><div id="parameterFields" class="parameter-fields"></div><div class="model-note">边损下限可为负数。利用率可能因负边损超过 100%；初始模式与最终整数解沿用原项目逻辑。</div></article></div></section>
-    <section id="results"><div class="section-heading"><div><span class="section-number">02 / OUTPUT</span><h2>从优化结果，到执行计划</h2></div><button id="exportJson" class="button secondary" disabled>↓ 导出完整 JSON</button></div><div id="emptyResults" class="empty-state"><span>▥</span><h3>下一份更优切割计划，从这里开始。</h3><p>运行算法后，这里将展示真实的每日用卷、切割模式与需求履约结果。</p></div><div id="resultContent" hidden><div class="result-grid"><article class="card"><div class="card-header"><div><h3>每日原料投入</h3><p>按计划日期汇总的用卷与模式数量</p></div><span class="legend"><i></i>原料卷数</span></div><div id="dailyChart" class="daily-chart" role="img" aria-label="每日原料使用量柱状图"></div></article><article class="card"><div class="card-header"><div><h3>求解概览</h3><p>真实算法执行结果</p></div><span class="success-icon">✓</span></div><div id="resultFacts" class="result-facts"></div><div class="model-note">列生成后求解整数主问题；不宣称全局最优。材料利用率包含超产，不等同于订单净利用率。</div></article></div><article class="card pattern-card"><div class="card-header"><div><h3>切割模式图谱</h3><p>每个色块是一段切割幅宽；斜纹部分表示剩余原料。</p></div><label>日期 <select id="patternDate" aria-label="筛选切割日期"></select></label></div><div id="patternBars" class="pattern-bars"></div></article><article class="card result-table-card"><div class="card-header"><div><h3>结果明细</h3><p id="resultRowCount">五类原生结果表，字段与原算法一致</p></div><button class="button small secondary" id="exportCsv">↓ 导出当前 CSV</button></div><div id="resultTabs" class="result-tabs" role="tablist" aria-label="结果类型"></div><div id="resultTable" class="table-scroll"></div></article></div></section>
-    <section id="method" class="method-section"><div><span class="section-number">03 / METHODOLOGY</span><h2>不穷举所有模式，<br>只生成有价值的列。</h2><p>原有 Python 算法保持不变。现代界面通过独立 FastAPI 服务调用 Context，实现从数据到排程的闭环。</p></div><div class="method-steps"><article><span>01</span><div><h3>受限主问题 · LP</h3><p>从初始切割模式求解线性松弛，获取各规格的对偶价格。</p></div></article><article><span>02</span><div><h3>定价子问题 · 背包模型</h3><p>搜索具有改进价值的组合，逐步扩展模式集合。</p></div></article><article><span>03</span><div><h3>整数主问题 · MILP</h3><p>确定各模式使用套数，输出供给、需求、履约与 KPI。</p></div></article></div></section>
-    <footer>Column Studio <span>Built for better material decisions.</span><a href="#overview">回到顶部 ↑</a></footer>
+
+    <section id="inputs">
+      <div class="section-heading"><div><span class="section-number">02 / CONFIGURE & RUN</span><h2>配置参数，运行模型</h2></div><button id="loadExample" class="button secondary">↺ 加载项目示例</button></div>
+      <div class="input-grid">
+        <article class="card demand-card"><div class="card-header"><div><h3>订单需求</h3><p>直接编辑 CSV，或导入 UTF-8 编码文件。</p></div><label class="button small secondary" for="csvUpload">↑ 导入 CSV</label><input id="csvUpload" type="file" accept=".csv,text/csv" hidden></div><label class="sr-only" for="demandEditor">订单需求 CSV</label><textarea id="demandEditor" spellcheck="false" placeholder="幅宽,订单件数,移库日期"></textarea><div class="editor-footer"><span id="editorStats">—</span><button class="text-button" id="previewButton">刷新数据预览 ↗</button></div><div id="inputPreview" class="table-scroll preview-table"></div></article>
+        <article class="card parameter-card"><div class="card-header"><div><h3>模型参数</h3><p>配置原料、切割、边损与余料约束。</p></div><span class="parameter-icon">⚙</span></div><div id="parameterFields" class="parameter-fields"></div><div class="model-note">边损下限可为负数。参数变化后需要重新运行模型，已有结果不会自动更新。</div></article>
+      </div>
+      <article class="run-panel run-workbench"><div><div class="panel-heading"><span class="tiny-label">MODEL EXECUTION</span><span class="pill light" id="runBadge">待运行</span></div><h3 id="runTitle">检查输入并启动模型</h3><p id="runDescription">确认订单需求和模型参数后，运行真实列生成算法。</p></div><div class="run-meta"><div><span>输入记录</span><strong id="inputCount">—</strong></div><div><span>计划天数</span><strong id="dayCount">—</strong></div><div><span>已用时间</span><strong id="elapsed">0.0s</strong></div></div><div class="run-action"><div class="progress-track"><div id="progressBar"></div></div><button class="button primary" id="runButton">▶ 运行列生成算法 <span>↗</span></button><small>保留原有模型 · 单任务最长 300 秒</small></div></article>
+      <div class="notice" id="notice" role="status" aria-live="polite">正在加载项目数据…</div>
+    </section>
+
+    <section id="results">
+      <div class="section-heading"><div><span class="section-number">03 / RESULTS</span><h2>查看优化结果与执行计划</h2></div><button id="exportJson" class="button secondary" disabled>↓ 导出完整 JSON</button></div>
+      <div class="kpi-grid"><article><div class="kpi-label">原料使用 <span>▥</span></div><div class="kpi-value" id="kpiRolls">—</div><p>原始纸卷 / 卷</p></article><article><div class="kpi-label">切割方案 <span>◫</span></div><div class="kpi-value" id="kpiPatterns">—</div><p>已使用模式 / 种</p></article><article><div class="kpi-label">材料利用率 <span>↗</span></div><div class="kpi-value" id="kpiUtilization">—</div><p>产出幅宽 ÷ 投入幅宽</p></article><article><div class="kpi-label">需求满足率 <span>✓</span></div><div class="kpi-value" id="kpiFulfillment">—</div><p>按订单数量计算</p></article></div>
+      <div id="emptyResults" class="empty-state results-empty"><span>▥</span><h3>模型尚未运行</h3><p>请先在第二步配置需求和参数并运行模型。完成后，这里会展示 KPI、每日用卷、切割模式和履约明细。</p></div>
+      <div id="resultContent" hidden>
+        <div class="result-grid"><article class="card"><div class="card-header"><div><h3>每日原料投入</h3><p>按计划日期汇总的用卷与模式数量</p></div><span class="legend"><i></i>原料卷数</span></div><div id="dailyChart" class="daily-chart" role="img" aria-label="每日原料使用量柱状图"></div></article><article class="card"><div class="card-header"><div><h3>求解概览</h3><p>真实算法执行结果</p></div><span class="success-icon">✓</span></div><div id="resultFacts" class="result-facts"></div><div class="model-note">列生成后求解整数主问题；材料利用率包含超产，不等同于订单净利用率。</div></article></div>
+        <article class="card pattern-card"><div class="card-header"><div><h3>切割模式图谱</h3><p>每个色块是一段切割幅宽；斜纹部分表示剩余原料。</p></div><label>日期 <select id="patternDate" aria-label="筛选切割日期"></select></label></div><div id="patternBars" class="pattern-bars"></div></article>
+        <article class="card result-table-card"><div class="card-header"><div><h3>结果明细</h3><p id="resultRowCount">五类原生结果表，字段与原算法一致</p></div><button class="button small secondary" id="exportCsv">↓ 导出当前 CSV</button></div><div id="resultTabs" class="result-tabs" role="tablist" aria-label="结果类型"></div><div id="resultTable" class="table-scroll"></div></article>
+      </div>
+    </section>
+
+    <section id="method" class="method-section">
+      <div><span class="section-number">04 / METHODOLOGY</span><h2>算法如何找到更好的切割模式？</h2><p>列生成避免一次性枚举海量组合，只在当前解的基础上寻找有改进价值的新模式，最后形成整数生产计划。</p></div>
+      <div class="method-steps"><article><span>01</span><div><h3>初始化可行切割模式</h3><p>根据订单幅宽和原料卷宽构造一组初始模式，确保主问题可以开始求解。</p></div></article><article><span>02</span><div><h3>受限主问题 · LP</h3><p>求解当前模式集合的线性松弛，获得每种需求规格的对偶价格。</p></div></article><article><span>03</span><div><h3>定价子问题 · 背包模型</h3><p>利用对偶价格搜索具有改进价值的新组合，并将其加入主问题。</p></div></article><article><span>04</span><div><h3>整数主问题 · MILP</h3><p>当没有更优新列时，确定各模式使用套数，输出供给、需求、履约与 KPI。</p></div></article></div>
+    </section>
+    <footer>Column Studio <span>Built for better material decisions.</span><a href="#problem">回到顶部 ↑</a></footer>
   </main>
 </body>
 </html>

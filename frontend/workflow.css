@@ -1,0 +1,36 @@
+.problem-hero { min-height: 310px; }
+.problem-hero .hero-copy { max-width: 480px; }
+.problem-hero .roll-art { max-width: 420px; margin-left: auto; }
+.problem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 18px; }
+.problem-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+.problem-card > span { font-size: 8px; letter-spacing: 1.5px; color: #789067; }
+.problem-card h3 { font-size: 14px; margin: 12px 0 8px; }
+.problem-card p { font-size: 10px; line-height: 1.9; color: #879181; }
+.problem-flow { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; padding: 15px 20px; background: #eef3e8; border-radius: 10px; color: #4e6948; font-size: 10px; }
+.problem-flow i { font-style: normal; color: #9bac91; }
+.run-workbench { margin-top: 20px; display: grid; grid-template-columns: minmax(230px, 1fr) minmax(230px, .8fr) minmax(280px, 1.1fr); align-items: center; gap: 30px; padding: 23px 25px; }
+.run-workbench h3 { margin: 12px 0 7px; }
+.run-workbench .run-meta { margin: 0; border-left: 1px solid var(--line); border-right: 1px solid var(--line); padding: 0 30px; }
+.run-action small { display: block; text-align: center; margin-top: 9px; font-size: 8px; color: #9ca498; }
+.run-action .progress-track { margin: 0 0 13px; }
+.results-empty { margin-top: 16px; }
+#inputs, #results, #method { scroll-margin-top: 24px; }
+
+@media (max-width: 960px) {
+  .problem-grid { grid-template-columns: 1fr 1fr; }
+  .problem-card:last-child { grid-column: 1 / -1; }
+  .run-workbench { grid-template-columns: 1fr 1fr; }
+  .run-workbench .run-action { grid-column: 1 / -1; }
+  .run-workbench .run-meta { border-right: 0; }
+}
+
+@media (max-width: 680px) {
+  .problem-hero { min-height: 270px; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .problem-card:last-child { grid-column: auto; }
+  .problem-flow { justify-content: flex-start; overflow-x: auto; white-space: nowrap; }
+  .run-workbench { grid-template-columns: 1fr; gap: 19px; }
+  .run-workbench .run-meta { border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 16px 0; }
+  .run-workbench .run-action { grid-column: auto; }
+  .results-empty { margin-top: 10px; }
+}
