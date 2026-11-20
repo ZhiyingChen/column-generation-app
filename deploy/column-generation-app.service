@@ -1,0 +1,28 @@
+[Unit]
+Description=Column Studio Cutting Optimization
+After=network.target
+
+[Service]
+Type=simple
+User=column-generation
+Group=column-generation
+WorkingDirectory=/opt/column_generation_app
+Environment=PYTHONUNBUFFERED=1
+Environment=APP_BASE_PATH=/column-generation
+Environment=ALLOWED_ORIGINS=http://43.163.3.74
+ExecStart=/opt/column_generation_app/.venv/bin/uvicorn api.main:app --host 127.0.0.1 --port 8091 --workers 1 --limit-concurrency 30
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+MemoryMax=768M
+CPUQuota=100%
+TasksMax=64
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

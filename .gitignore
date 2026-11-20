@@ -10,3 +10,6 @@ launch_app.py
 *.log
 *.xml
 *.xlsx
+.venv/
+.env
+artifacts/

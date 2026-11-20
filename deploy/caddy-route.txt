@@ -1,0 +1,4 @@
+redir /column-generation /column-generation/ 308
+handle_path /column-generation/* {
+    reverse_proxy 127.0.0.1:8091
+}

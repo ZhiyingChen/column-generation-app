@@ -12,6 +12,35 @@ pinned: false
 
 # 📦 切割优化与列生成算法（Column Generation for Multi-Day Cutting Plan）
 
+## Column Studio 现代化工作台
+
+新增独立响应式前端与 FastAPI，source/ 核心列生成、余料补库与 GLPK 模型保持原样。旧 Streamlit 可按原依赖运行，但不作为生产主要界面。
+
+### 本地运行（Python 3.11 / 3.12）
+
+安装 GLPK，确保 glpsol 在 PATH 中，然后创建虚拟环境并安装独立 Web 依赖：
+
+```sh
+python -m venv .venv
+# Windows 使用 .venv/Scripts/python；Linux 使用 .venv/bin/python
+.venv/Scripts/python -m pip install -r requirements-web.txt
+.venv/Scripts/python -m uvicorn api.main:app --host 127.0.0.1 --port 8091
+```
+
+访问 http://127.0.0.1:8091/，自动进入 /studio/，API 文档 /docs。生产隔离部署见 deploy/README.md。新运行时不需要 Streamlit、Matplotlib 或商业求解器。
+
+### 接口和数据
+
+- GET /api/health：服务与 GLPK 可用状态。
+- GET /api/example：原始 CSV 示例，返回 demand 和 parameters 数组。
+- POST /api/jobs：提交上述结构，HTTP 202 返回 id。demand 每行包含 幅宽、订单件数、移库日期；parameters 每行包含 参数名、参数值。最少提供 原始卷纸长度 和 最大切割次数，可选原项目全部参数，包括 切割方案使用下限。
+- GET /api/jobs/{id}：queued / running / succeeded / failed 状态、逐日期进度或最终 result。
+- result 包含 success、runtime、summary、results。results 完整保留 kpiOut.csv、solutionOut.csv、supplyOut.csv、demandOut.csv、fulfillmentOut.csv 五张原生结果表，DataFrame/NumPy 通过 pandas JSON 编码，NaT/NaN 均为 null。
+- CSV 可编辑、上传和预览，结果支持各表 CSV 和完整 JSON 导出。输入变化后需重新运行。
+- 利用率为所有产出幅宽 / 总投入幅宽，包含超产；负边损可能使其超过 100%。初始模式与最终整数解保留原项目逻辑，不提供额外全局约束保证或最优性证明。
+
+ALLOWED_ORIGINS 可用逗号分隔设置明确跨域来源，默认仅允许本地 8091；同源部署不需要手动配置 API 地址。生产 APP_BASE_PATH=/column-generation；Caddy 剥离此路径后转发。仅启动单 worker，内存任务队列不跨进程共享。每个任务在独立进程和临时目录执行，不覆盖算法输出文件。
+
 ---
 
 ## 🧩 项目背景
